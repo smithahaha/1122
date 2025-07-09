@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  avatar    String?
+  settings  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  conversations Conversation[]
+  translations  Translation[]
+  agents        Agent[]
+  tasks         Task[]
+
+  @@map("users")
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  title     String
+  model     String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  role           String   // 'user', 'assistant', 'system'
+  content        String
+  conversationId String
+  model          String?
+  tokens         Int?
+  timestamp      DateTime @default(now())
+
+  // 关联
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Translation {
+  id         String   @id @default(uuid())
+  sourceText String
+  targetText String
+  sourceLang String
+  targetLang String
+  userId     String
+  timestamp  DateTime @default(now())
+
+  // 关联
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("translations")
+}
+
+model Agent {
+  id           String   @id @default(uuid())
+  name         String
+  description  String
+  avatar       String?
+  version      String   @default("1.0.0")
+  capabilities Json
+  memory       Json?
+  tools        Json
+  workflows    Json?
+  config       Json
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // 关联
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@map("agents")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  type        String   // 'simple', 'complex', 'workflow'
+  status      String   // 'pending', 'planning', 'executing', 'completed', 'failed', 'cancelled'
+  priority    String   // 'low', 'medium', 'high', 'urgent'
+  steps       Json
+  result      Json?
+  metadata    Json
+  userId      String
+  agentId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent Agent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@map("tasks")
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  service   String   // 'openai', 'gemini', 'deepseek', 'translate'
+  key       String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, service])
+  @@map("api_keys")
+}
+
+model UsageStats {
+  id        String   @id @default(uuid())
+  userId    String
+  service   String   // 'chat', 'translate', 'image', 'content'
+  model     String?
+  tokens    Int?
+  requests  Int      @default(1)
+  cost      Float?
+  date      DateTime @default(now())
+
+  @@map("usage_stats")
+} 
