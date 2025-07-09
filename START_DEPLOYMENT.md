@@ -34,7 +34,7 @@ ssh root@138.197.99.117
 
 ```bash
 # 下载部署脚本
-wget https://raw.githubusercontent.com/https://github.com/smithahaha/1122/main/deploy-config/final-deploy.sh
+wget https://raw.githubusercontent.com/github.com/smithahaha/1122/main/deploy-config/final-deploy.sh
 
 # 给予执行权限
 chmod +x final-deploy.sh
@@ -88,3 +88,64 @@ chmod +x deploy-config/check-status.sh
 ---
 
 **准备好了吗？现在就开始部署吧！** 🚀 
+
+## 🚀 **直接在服务器上部署**
+
+既然您已经连接到服务器，让我们直接创建部署脚本并运行：
+
+### 第1步：创建部署脚本
+
+在服务器上运行以下命令：
+
+```bash
+<code_block_to_apply_changes_from>
+```
+
+### 第2步：运行部署脚本
+
+```bash
+# 给予执行权限
+chmod +x deploy-aitars.sh
+
+# 运行部署脚本
+./deploy-aitars.sh
+```
+
+### 第3步：配置SSL证书（在DNS生效后）
+
+```bash
+# 等待DNS生效后运行
+certbot --nginx -d aitars.io -d www.aitars.io
+```
+
+### 第4步：状态检查
+
+```bash
+# 检查服务状态
+pm2 status
+systemctl status nginx
+
+# 测试访问
+curl http://localhost:3001/health
+curl http://aitars.io
+```
+
+## 🔧 **快速命令列表**
+
+如果您想要逐步执行，可以复制以下命令：
+
+```bash
+# 1. 创建部署脚本（复制上面的完整脚本）
+# 2. 运行部署
+chmod +x deploy-aitars.sh && ./deploy-aitars.sh
+
+# 3. 配置SSL（DNS生效后）
+certbot --nginx -d aitars.io -d www.aitars.io
+
+# 4. 检查状态
+pm2 status && systemctl status nginx
+```
+
+请在服务器上复制粘贴这些命令。脚本会自动使用您的正确仓库地址 `https://github.com/smithahaha/1122` 进行部署。
+
+**需要我帮您解释任何步骤吗？** 
